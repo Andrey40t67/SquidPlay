@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра в кальмара: Мини-игры</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: white;
+            text-align: center;
+        }
+
+        .game-container {
+            margin: 20px;
+        }
+
+        button {
+            background-color: #444;
+            border: none;
+            color: white;
+            padding: 10px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #666;
+        }
+
+        canvas {
+            border: 2px solid white;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Игра в кальмара: Мини-игры</h1>
+
+        <div id="game1" class="game">
+            <h2>Игра 1: Вырезание печенки</h2>
+            <canvas id="cookieGame"></canvas>
+            <button onclick="startGame1()">Начать игру</button>
+        </div>
+
+        <div id="game2" class="game">
+            <h2>Игра 2: Ангинори</h2>
+            <canvas id="anginoriGame"></canvas>
+            <button onclick="startGame2()">Начать игру</button>
+        </div>
+
+        <div id="game3" class="game">
+            <h2>Игра 3: Pental Home</h2>
+            <canvas id="pentalGame"></canvas>
+            <button onclick="startGame3()">Начать игру</button>
+        </div>
+    </div>
+
+    <script>
+        // Проверка, был ли игрок заблокирован
+        if (localStorage.getItem('blocked') === 'true') {
+            document.body.innerHTML = '<h1>Вы проиграли! Доступ к сайту заблокирован.</h1>';
+        }
+
+        // Игра 1: Вырезание печенки
+        let cookieGameCanvas = document.getElementById('cookieGame');
+        let ctx1 = cookieGameCanvas.getContext('2d');
+
+        function startGame1() {
+            if (localStorage.getItem('blocked') === 'true') return;
+
+            cookieGameCanvas.width = 400;
+            cookieGameCanvas.height = 400;
+
+            let cookieShape = new Path2D();
+            cookieShape.arc(200, 200, 150, 0, Math.PI * 2); // Круг для печеньки
+
+            ctx1.clearRect(0, 0, cookieGameCanvas.width, cookieGameCanvas.height);
+            ctx1.beginPath();
+            ctx1.arc(200, 200, 150, 0, Math.PI * 2);
+            ctx1.stroke();
+            ctx1.fill();
+            ctx1.closePath();
+
+            // Взаимодействие с пользователем
+            cookieGameCanvas.addEventListener('mousedown', function(event) {
+                let mouseX = event.offsetX;
+                let mouseY = event.offsetY;
+
+                if (ctx1.isPointInPath(cookieShape, mouseX, mouseY)) {
+                    alert('Вы проиграли, печенька сломана!');
+                    localStorage.setItem('blocked', 'true'); // Заблокировать доступ
+                    document.location.reload(); // Перезагрузить страницу, чтобы заблокировать сайт
+                }
+            });
+        }
+
+        // Игра 2: Ангинори
+        let anginoriGameCanvas = document.getElementById('anginoriGame');
+        let ctx2 = anginoriGameCanvas.getContext('2d');
+
+        function startGame2() {
+            if (localStorage.getItem('blocked') === 'true') return;
+
+            anginoriGameCanvas.width = 400;
+            anginoriGameCanvas.height = 400;
+
+            // Логика игры Ангинори (простая версия)
+            ctx2.clearRect(0, 0, anginoriGameCanvas.width, anginoriGameCanvas.height);
+
+            // Примерная реализация: палка движется по экрану и игрок должен уклониться
+            let stickPosition = 0;
+            let stickDirection = 1; // 1 - вправо, -1 - влево
+
+            function moveStick() {
+                if (stickPosition > anginoriGameCanvas.width - 20 || stickPosition < 0) {
+                    stickDirection *= -1;
+                }
+                stickPosition += stickDirection;
+
+                ctx2.clearRect(0, 0, anginoriGameCanvas.width, anginoriGameCanvas.height);
+                ctx2.fillStyle = 'red';
+                ctx2.fillRect(stickPosition, anginoriGameCanvas.height / 2, 20, 20);
+
+                // Увековечить проигрыш
+                if (stickPosition > anginoriGameCanvas.width - 20) {
+                    alert('Вы проиграли! Палка ударила вас!');
+                    localStorage.setItem('blocked', 'true');
+                    document.location.reload();
+                }
+
+                requestAnimationFrame(moveStick);
+            }
+
+            moveStick();
+        }
+
+        // Игра 3: Pental Home
+        let pentalGameCanvas = document.getElementById('pentalGame');
+        let ctx3 = pentalGameCanvas.getContext('2d');
+
+        function startGame3() {
+            if (localStorage.getItem('blocked') === 'true') return;
+
+            pentalGameCanvas.width = 400;
+            pentalGameCanvas.height = 400;
+
+            // Логика игры Pental Home
+            // Примерная реализация: мячик движется по экрану, и игрок должен уклоняться
+            let ballPosition = { x: 200, y: 200 };
+            let speed = { x: 2, y: 2 };
+
+            function moveBall() {
+                ballPosition.x += speed.x;
+                ballPosition.y += speed.y;
+
+                if (ballPosition.x > pentalGameCanvas.width || ballPosition.x < 0) speed.x = -speed.x;
+                if (ballPosition.y > pentalGameCanvas.height || ballPosition.y < 0) speed.y = -speed.y;
+
+                ctx3.clearRect(0, 0, pentalGameCanvas.width, pentalGameCanvas.height);
+                ctx3.beginPath();
+                ctx3.arc(ballPosition.x, ballPosition.y, 10, 0, Math.PI * 2);
+                ctx3.fillStyle = 'green';
+                ctx3.fill();
+                ctx3.closePath();
+
+                // Проверка на проигрыш
+                if (Math.abs(ballPosition.x - 200) < 20 && Math.abs(ballPosition.y - 200) < 20) {
+                    alert('Вы проиграли! Мячик в вас попал!');
+                    localStorage.setItem('blocked', 'true');
+                    document.location.reload();
+                }
+
+                requestAnimationFrame(moveBall);
+            }
+
+            moveBall();
+        }
+    </script>
+</body>
+</html>
